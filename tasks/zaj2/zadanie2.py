@@ -1,8 +1,8 @@
+#!/opt/py3.4/bin/python3.4
 # -*- coding: utf-8 -*-
 
 import pickle
 import pathlib
-
 
 def load_animals(large_dataset=False):
     """
@@ -13,6 +13,7 @@ def load_animals(large_dataset=False):
 
     :return: Lista zwierząt
     """
+    
     file_name = 'animals-small.bin' if not large_dataset else 'animals.bin'
     file = pathlib.Path(__file__).parent / file_name
     with open(str(file), 'rb') as f:
@@ -50,6 +51,30 @@ def filter_animals(animal_list):
 
     :param animal_list:
     """
+    lista = []
+    genus_dict = {}
+    for animal in animal_list:
+        if animal['genus'] not in genus_dict.keys():
+            #lista.append(animal)
+            genus_dict[animal['genus']] = {animal['sex'] : animal}
+        else:
+            if animal['sex'] not in genus_dict[animal['genus']].keys():
+                #lista.append(animal)
+                genus_dict[animal['genus']] = {animal['sex'] : animal}
+            else:
+                if animal['mass'] < genus_dict[animal['genus']][animal['sex']]['mass']:
+                    genus_dict[animal['genus']][animal['sex']] = animal
+    for item in genus_dict:
+        for el in genus_dict[item]:
+                lista.append(genus_dict[item][el])
+
+    print(lista[:1])
+    def keyS(item):
+        return item['genus']
+    lista.sort(key = keyS)
+        
 
 if __name__ == "__main__":
     animals = load_animals()
+
+filter_animals(load_animals())
