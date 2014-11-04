@@ -32,17 +32,17 @@ class Integrator(object):
         :rtype: List of integers
         """
         if level == 2:
-		self.wspolczynnik = 2
-                return [1,1]
+            self.wspolczynnik = 2
+            return [1,1]
         elif level == 3:
-		self.wspolczynnik = 3
-                return [1,4,1]
+            self.wspolczynnik = 3
+            return [1,4,1]
         elif level == 4:
-		self.wspolczynnik = 8/3.
-                return [1,3,3,1]
-	elif level == 5:
-		self.wspolczynnik = 45/2.
-                return [7,32,12,32,7]
+            self.wspolczynnik = 8/3.
+            return [1,3,3,1]
+        elif level == 5:
+            self.wspolczynnik = 45/2.
+            return [7,32,12,32,7]
 
     def __init__(self, level):
         """
@@ -50,8 +50,8 @@ class Integrator(object):
         Jeśli obiekt zostanie skonstruowany z parametrem 2 używa metody trapezów.
         :param level: Stopień metody NC
         """
-	if level in range(2,6):
-                self.level = level
+        if level in range(2,6):
+            self.level = level
         else: print("Wrong level number - choose between 2 and 5")
 
     def integrate(self, func, func_range, num_evaluations):
@@ -78,27 +78,20 @@ class Integrator(object):
         :return: Wynik całkowania.
         :rtype: float
         """
-	
+
         params = self.get_level_parameters(self.level)
-	print params
- 
         h = (func_range[1]-func_range[0])/(num_evaluations*(self.level-1))
-	print "h i wspolczynnik"
-      	print h, self.wspolczynnik
-        sum = 0
-	x = func_range[0]
-	for i in range(num_evaluations):
-                for p in params:
-                        sum = sum + p*func(x)
-			print sum
-                        x=x+h
-	print "WYNIK:"
-	print sum*h/self.wspolczynnik
-	return sum*h/self.wspolczynnik
+        suma = 0
+        x = func_range[0]
+        for it in range(num_evaluations):
+            for p in params:
+                suma = suma + p*func(x)
+                x=x+h
+        return suma*h/self.wspolczynnik
               
 
 
 if __name__ == '__main__':
-    i = Integrator(5)
+    i = Integrator(3)
     print(i.integrate(math.cos, (0, 2*math.pi), 30))
     #print(i.integrate(lambda x: x*x, (0, 1), 30))

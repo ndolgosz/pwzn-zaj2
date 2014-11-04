@@ -1,4 +1,4 @@
-#!/opt/py3.4/bin/python3.4
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 import pickle
@@ -52,26 +52,31 @@ def filter_animals(animal_list):
     :param animal_list:
     """
     lista = []
+    mass_dict = {'kg' : 1000, 'mg' : 0.001, 'Mg' : 1e6, 'g' : 1}
     genus_dict = {}
     for animal in animal_list:
         if animal['genus'] not in genus_dict.keys():
-            #lista.append(animal)
             genus_dict[animal['genus']] = {animal['sex'] : animal}
         else:
             if animal['sex'] not in genus_dict[animal['genus']].keys():
-                #lista.append(animal)
-                genus_dict[animal['genus']] = {animal['sex'] : animal}
+                genus_dict[animal['genus']].update({animal['sex'] : animal})
             else:
-                if animal['mass'] < genus_dict[animal['genus']][animal['sex']]['mass']:
+                mass_old = genus_dict[animal['genus']][animal['sex']]['mass'][0]
+                unit = mass_dict[genus_dict[animal['genus']][animal['sex']]['mass'][1]]
+                if animal['mass'][0]*mass_dict[animal['mass'][1]] < mass_old*unit:
                     genus_dict[animal['genus']][animal['sex']] = animal
+         
     for item in genus_dict:
         for el in genus_dict[item]:
                 lista.append(genus_dict[item][el])
 
-    print(lista[:1])
-    def keyS(item):
+   
+    def keyGenus(item):
         return item['genus']
-    lista.sort(key = keyS)
+    def keyName(item):
+        return item['name']
+    lista.sort(key = keyName)
+    lista.sort(key = keyGenus)
         
 
 if __name__ == "__main__":
