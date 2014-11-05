@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import math
+from numpy.lib.polynomial import poly1d, polyint, polyval
 
 
 class Integrator(object):
@@ -18,9 +19,9 @@ class Integrator(object):
         ifów.
 
     """
- 
+
     @classmethod
-    def get_level_parameters(self, level):
+    def get_level_parameters(cls, level):
         """
 
         :param int level: Liczba całkowita większa od jendości.
@@ -31,18 +32,17 @@ class Integrator(object):
                  [1, 3, 1] itp.
         :rtype: List of integers
         """
-        if level == 2:
-            self.wspolczynnik = 2
-            return [1,1]
-        elif level == 3:
-            self.wspolczynnik = 3
-            return [1,4,1]
-        elif level == 4:
-            self.wspolczynnik = 8/3.
-            return [1,3,3,1]
-        elif level == 5:
-            self.wspolczynnik = 45/2.
-            return [7,32,12,32,7]
+        paramList = []
+        for elem in range(level):
+            param = 1
+            for i in range(level):
+                if elem != i:
+                    param = param*poly1d([1, -i])
+            param = polyint(param)
+            param = polyval(param,level-1)-polyval(param,0)
+            a = math.pow(-1,level-elem-1)/math.factorial(elem)/math.factorial(level-elem-1)
+            paramList.append(param*a)
+        return paramList            
 
     def __init__(self, level):
         """
@@ -50,9 +50,20 @@ class Integrator(object):
         Jeśli obiekt zostanie skonstruowany z parametrem 2 używa metody trapezów.
         :param level: Stopień metody NC
         """
-        if level in range(2,6):
-            self.level = level
-        else: print("Wrong level number - choose between 2 and 5")
+        self.level = level
+
+    def methodNC(self, func, func_range):
+        """
+        Funkcja pomocnicza z implementacja metody Newtona-Cotesa
+        """
+        integral = 0
+        range_max = func_range[1]
+        range_min = func_range[0]
+        x = (range_max-range_min)/(self.level-1)
+        par = self.get_level_parameters(self.level)
+        for i in range(self.level):
+            integral += par[i]*func(range_min+x*i)
+        return integral*x
 
     def integrate(self, func, func_range, num_evaluations):
         """
@@ -78,20 +89,16 @@ class Integrator(object):
         :return: Wynik całkowania.
         :rtype: float
         """
-
-        params = self.get_level_parameters(self.level)
-        h = (func_range[1]-func_range[0])/(num_evaluations*(self.level-1))
-        suma = 0
-        x = func_range[0]
-        for it in range(num_evaluations):
-            for p in params:
-                suma = suma + p*func(x)
-                x=x+h
-        return suma*h/self.wspolczynnik
-              
-
+        integral = 0
+        range_max = func_range[1]
+        range_min = func_range[0]
+        iterations = math.floor(num_evaluations/self.level)
+        step = (range_max-range_min)/iterations
+        for i in range(iterations):
+            integral += self.methodNC(func, (range_min+i*step, range_min+(i+1)*step))
+        return integral
 
 if __name__ == '__main__':
     i = Integrator(3)
-    print(i.integrate(math.cos, (0, 2*math.pi), 30))
-    #print(i.integrate(lambda x: x*x, (0, 1), 30))
+    print(i.integrate(math.sin, (0, 2*math.pi), 30))
+    print(i.integrate(lambda x: x*x, (0, 1), 30))
