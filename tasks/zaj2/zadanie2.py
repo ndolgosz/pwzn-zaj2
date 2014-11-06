@@ -77,6 +77,7 @@ def filter_animals(animal_list):
         return item['name']
     lista.sort(key = keyName)
     lista.sort(key = keyGenus)
+    return lista
         
 
 if __name__ == "__main__":
